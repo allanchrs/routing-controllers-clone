@@ -72,7 +72,9 @@ export class Routes {
         const maped_request_url = format_request_url.split('/');
 
         const fill_url = maped_url.map((url, index) => {
-          if (url.includes(':')) return maped_request_url[index];
+          if (url.includes(':')) {
+            return maped_request_url[index];
+          }
 
           return url
         }).join('/')

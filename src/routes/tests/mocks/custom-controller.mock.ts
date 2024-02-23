@@ -7,6 +7,11 @@ export class MockCustomController {
     return { success: true, path: '/' }
   }
 
+  @Get({ path: 'param/:id' })
+  getWithParam() {
+    return { success: true, path: 'param/:id' }
+  }
+
   @Post({ path: 'custom', status: 201 })
   getCustom() {
     return { success: true, path: 'custom' }

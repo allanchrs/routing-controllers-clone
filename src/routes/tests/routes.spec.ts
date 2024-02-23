@@ -4,6 +4,7 @@ import { Controller, Get } from "@common/decorators";
 import { MockDefaultController } from "./mocks/default-controller.mock";
 import { MockCustomController } from "./mocks/custom-controller.mock";
 import { MockEmptyController } from "./mocks/empty-controller.mock";
+import { randomUUID } from "crypto";
 
 
 
@@ -275,6 +276,23 @@ describe('#Routes', () => {
           exception: 'NotFoundException',
           message: `Route with url [GET] 'undefined' not found`
         }));
+      }
+    },
+    {
+      should: `given :id/param request url and return success`,
+      input: () => {
+        const input = { ...params }
+        input.request.method = 'GET'
+        input.request.url = `custom/param/${randomUUID()}`
+        input.values = () => Object.values<any>(input)
+        return input
+      },
+      setup: () => {
+        routes = new Routes({ controllers: [MockCustomController] })
+      },
+      expected: () => {
+        expect(params.response.writeHead).toHaveBeenCalledWith(200);
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'param/:id' }));
       }
     },
   ])('Should $should', async ({ input, expected, setup, should }) => {
