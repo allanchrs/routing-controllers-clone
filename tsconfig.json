@@ -27,9 +27,8 @@
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "paths": {
-      "@common/*": ["./src/server/common/*"],
-      "@enums/*": ["./src/server/enums/*"],
-      "@database/*": ["./src/database/*"]
+      "@common/*": ["./src/common/*"],
+      "@enums/*": ["./src/enums/*"]
     }
   },
   "include": ["./src", "@types/fastify.d.ts", "@types/nestjs.d.ts"]
