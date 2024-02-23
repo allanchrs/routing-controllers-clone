@@ -1,11 +1,11 @@
 import { readFileSync } from 'fs';
 import https from 'https';
 import { AddressInfo } from 'net';
-import { logger } from '../core/utils/logger/logger';
 import 'dotenv/config'
 import { Server } from 'socket.io'
 import { Routes } from './routes/routes';
 import { UserController } from './controllers/user.controller';
+import { logger } from './utils/logger/logger';
 
 class ServerInit {
   private readonly PORT = process.env.PORT ?? 3000;

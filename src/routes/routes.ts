@@ -1,6 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { Server } from "socket.io";
-import { logger } from "../../core/utils/logger/logger";
 import { ParamDecoratorEnum } from "@common/enums";
 
 type RouteController = {
@@ -77,8 +76,6 @@ export class Routes {
 
           return url
         }).join('/')
-
-        console.log({ fill_url, format_request_url })
 
         return fill_url === format_request_url
       })
