@@ -1,13 +1,9 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { Routes } from "../routes"
-import { Controller, Get } from "@common/decorators";
 import { MockDefaultController } from "./mocks/default-controller.mock";
 import { MockCustomController } from "./mocks/custom-controller.mock";
 import { MockEmptyController } from "./mocks/empty-controller.mock";
 import { randomUUID } from "crypto";
-
-
-
 
 describe('#Routes', () => {
   let routes: Routes;

@@ -1,4 +1,5 @@
 export enum ParamDecoratorEnum {
+  QUERY = 'query:index',
   PARAM = 'param:index',
   BODY = 'body:index',
   REQ = 'request:index',

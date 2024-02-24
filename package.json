@@ -11,7 +11,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc",
-    "dev": "tsnd --inspect --transpile-only --ignore-watch -r tsconfig-paths/register src/server/index.ts",
+    "dev": "tsnd --inspect --transpile-only --ignore-watch -r tsconfig-paths/register src/index.ts",
     "start": "node server/index.js",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test": "jest --coverage=false",

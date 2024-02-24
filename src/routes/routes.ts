@@ -102,6 +102,8 @@ export class Routes {
       const output = await route.handler.apply(controller, [
         {
           [ParamDecoratorEnum.BODY]: request,
+          [ParamDecoratorEnum.PARAM]: request,
+          [ParamDecoratorEnum.QUERY]: request,
           [ParamDecoratorEnum.REQ]: request,
           [ParamDecoratorEnum.RES]: response,
           [ParamDecoratorEnum.SOCKET]: this.io

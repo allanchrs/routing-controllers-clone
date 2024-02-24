@@ -3,6 +3,6 @@ import { ParamDecoratorEnum } from '../../enums';
 
 export const Body = () => {
   return (target: Object, key: string | symbol, index: number) => {
-    Reflect.defineMetadata(ParamDecoratorEnum.BODY, index, target, key);
+    Reflect.defineMetadata(ParamDecoratorEnum.BODY, { index, key: ParamDecoratorEnum.BODY }, target, key);
   };
 }

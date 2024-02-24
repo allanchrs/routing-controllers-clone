@@ -1,17 +1,19 @@
-import { Body, Controller, Post, Req, Socket } from "@common/decorators";
-import { IncomingMessage } from "http";
-import { Server } from "socket.io";
+import { Body, Controller, Param, Post, Put } from "@common/decorators";
 
 @Controller('users')
 export class UserController {
-  // private readonly createUser = new CreateUser(new UserRepository())
-
-  @Post({ path: ':id/test/:aa', status: 201 })
+  @Post({ path: 'create', status: 201 })
   async create(
-    @Socket() io: Server,
     @Body() body: any,
-    @Req() req: IncomingMessage,
   ): Promise<any> {
-    return body;
+    return { ...body };
+  }
+
+  @Put({ path: 'update/:id', status: 201 })
+  async update(
+    @Body() body: any,
+    @Param('id') id: string
+  ): Promise<any> {
+    return { ...body, id };
   }
 }
