@@ -28,7 +28,8 @@
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@common/*": ["./src/common/*"],
-      "@enums/*": ["./src/enums/*"]
+      "@enums/*": ["./src/enums/*"],
+      "@utils/*": ["./src/utils/*"]
     }
   },
   "include": ["./src", "@types/fastify.d.ts", "@types/nestjs.d.ts"]

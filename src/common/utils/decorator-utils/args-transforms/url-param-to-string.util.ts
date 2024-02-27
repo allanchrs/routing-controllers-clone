@@ -1,11 +1,13 @@
 import { IncomingMessage } from "http";
 
-export const getParamFromRequest = async (
-  request?: IncomingMessage,
+type Args = {
+  arg?: IncomingMessage,
   prefix?: string,
   path?: string,
   param?: string
-): Promise<string | undefined> => {
+}
+
+export const urlParamToString = async ({ arg: request, path, prefix, param }: Args): Promise<string | undefined> => {
   if (!request || !path) return;
 
   const url = prefix ? `${prefix}/${path}` : path;

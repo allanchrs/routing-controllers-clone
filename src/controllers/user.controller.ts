@@ -14,6 +14,7 @@ export class UserController {
     @Body() body: any,
     @Param('id') id: string
   ): Promise<any> {
+    console.log({ test: global.test })
     return { ...body, id };
   }
 }

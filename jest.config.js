@@ -11,6 +11,7 @@ module.exports = {
   moduleNameMapper: {
     '^@common/(.*)$': '<rootDir>/src/common/$1',
     '^@enums/(.*)$': '<rootDir>/src/enums/$1',
+    '^@utils/(.*)$': '<rootDir>/src/utils/$1',
   },
   moduleDirectories: ['node_modules'],
   collectCoverageFrom: [

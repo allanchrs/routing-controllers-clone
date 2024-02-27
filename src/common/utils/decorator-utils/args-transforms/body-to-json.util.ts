@@ -1,6 +1,12 @@
 import { IncomingMessage } from "http";
+type Args = {
+  arg?: IncomingMessage,
+  prefix?: string,
+  path?: string,
+  param?: string
+}
 
-export const getBodyAsJson = (request?: IncomingMessage): Promise<any> => {
+export const bodyToJson = ({ arg: request }: Args): Promise<any> => {
   return new Promise((resolve, reject) => {
     if (!request) return;
     let body = '';
