@@ -18,6 +18,7 @@ const registerRoute = ({ method, path, status, target, descriptor }: Input & { t
   if (!target.routes) {
     target.routes = [];
   }
+
   target.routes.push({
     method,
     status,

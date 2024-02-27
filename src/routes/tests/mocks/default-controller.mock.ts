@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from "@common/decorators";
+import { Body, Controller, Get, Post } from "@common/decorators";
 
 @Controller()
 export class MockDefaultController {
@@ -8,7 +8,9 @@ export class MockDefaultController {
   }
 
   @Post({ path: 'custom', status: 201 })
-  getCustom() {
-    return { success: true, path: 'custom' }
+  postCustom(
+    @Body() body: any
+  ) {
+    return { success: true, path: 'custom', ...body }
   }
 }

@@ -4,6 +4,8 @@ import { MockDefaultController } from "./mocks/default-controller.mock";
 import { MockCustomController } from "./mocks/custom-controller.mock";
 import { MockEmptyController } from "./mocks/empty-controller.mock";
 import { randomUUID } from "crypto";
+import { Readable } from "stream";
+import { Socket } from "node:net";
 
 describe('#Routes', () => {
   let routes: Routes;
@@ -24,7 +26,7 @@ describe('#Routes', () => {
       },
       method: 'GET',
       url: '/',
-      body: {}
+      body: jest.fn()
     },
     response: {
       setHeader: jest.fn(),
@@ -33,6 +35,8 @@ describe('#Routes', () => {
     },
     values: () => Object.values<any>(params)
   }
+
+  const id = randomUUID();
 
   it.each([
     {
@@ -105,21 +109,29 @@ describe('#Routes', () => {
     },
     {
       should: `given POST method and '/custom' route path to be returns body response from MockDefaultController`,
-      only: true,
       input: () => {
-        const input = { ...params }
-        input.request.method = 'POST'
-        input.request.url = '/custom'
-        input.values = () => Object.values<any>(input)
-        return input
+        const body = JSON.stringify({ id });
+        const readableStream = new Readable();
+        readableStream.push(body);
+        readableStream.push(null);
+        const request = new IncomingMessage(new Socket());
+        request.push(body)
+        request.push(null);
+        request.method = 'POST';
+        request.url = '/custom';
+        const input = {
+          ...params,
+          request,
+          values: () => Object.values<any>(input)
+        }
+        return input;
       },
       setup: () => {
         routes = new Routes({ controllers: [MockDefaultController] })
       },
       expected: (err?: any) => {
-        console.log({ err })
-        // expect(params.response.writeHead).toHaveBeenCalledWith(201);
-        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'custom' }));
+        expect(params.response.writeHead).toHaveBeenCalledWith(201);
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'custom', id }));
       }
     },
     {
@@ -277,11 +289,11 @@ describe('#Routes', () => {
       }
     },
     {
-      should: `given :id/param request url and return success`,
+      should: `given param/:id request url and return success`,
       input: () => {
         const input = { ...params }
         input.request.method = 'GET'
-        input.request.url = `custom/param/${randomUUID()}`
+        input.request.url = `custom/param/${id}`
         input.values = () => Object.values<any>(input)
         return input
       },
@@ -290,10 +302,10 @@ describe('#Routes', () => {
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(200);
-        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'param/:id' }));
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: `param/${id}` }));
       }
     },
-  ])('Should $should', async ({ input, expected, setup, only }) => {
+  ])('Should $should', async ({ input, expected, setup }) => {
     if (setup) setup();
 
     if (!input) {
@@ -303,5 +315,5 @@ describe('#Routes', () => {
 
     await routes.handler(...(input().values() as [IncomingMessage, ServerResponse]))
     expected()
-  })
+  }, 10000)
 })

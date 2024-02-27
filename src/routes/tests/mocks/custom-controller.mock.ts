@@ -1,4 +1,4 @@
-import { Controller, Get, Post } from "@common/decorators";
+import { Controller, Get, Param, Post } from "@common/decorators";
 
 @Controller('custom')
 export class MockCustomController {
@@ -8,8 +8,10 @@ export class MockCustomController {
   }
 
   @Get({ path: 'param/:id' })
-  getWithParam() {
-    return { success: true, path: 'param/:id' }
+  getWithParam(
+    @Param('id') id: string
+  ) {
+    return { success: true, path: `param/${id}` }
   }
 
   @Post({ path: 'custom', status: 201 })
@@ -20,5 +22,10 @@ export class MockCustomController {
   @Get({ path: 'throw' })
   getThrow() {
     throw new Error("Throw route");
+  }
+
+  @Get({ path: 'test' })
+  getTest() {
+    throw new Error("Test Throw route");
   }
 }

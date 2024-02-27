@@ -11,7 +11,6 @@ export const urlParamToString = async ({ arg: request, path, prefix, param }: Ar
   if (!request || !path) return;
 
   const url = prefix ? `${prefix}/${path}` : path;
-
   const index = url.split('/').findIndex(((key) => {
     return key.replace(':', '') === param
   }));

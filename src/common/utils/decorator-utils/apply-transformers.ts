@@ -1,12 +1,13 @@
+import { RouteDecoratorInput } from "@common/decorators";
 import { transformers } from "./transformers";
 
 type ApplyTransformersArgs = {
   args: any[], indices: any[], target: any
-}
+} & RouteDecoratorInput
 
-export const applyTransformers = async ({ indices, target, args: [args] }: ApplyTransformersArgs): Promise<any[]> => {
+export const applyTransformers = async ({ indices, target, args: [args], path }: ApplyTransformersArgs): Promise<any[]> => {
   const output: any[] = [];
-  const { prefix, path } = target;
+  const { prefix } = target;
   await Promise.all(
     indices.map(async ({ index, key, param }) => {
       const transform = transformers[key];
