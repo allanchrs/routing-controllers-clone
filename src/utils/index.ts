@@ -1,0 +1,1 @@
+export * from './get-prototype-value.util'
