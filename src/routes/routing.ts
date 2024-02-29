@@ -3,7 +3,7 @@ import { Server } from "socket.io";
 import { Router } from "./router";
 import { NotFoundException } from "@exceptions/not-fount.exception";
 
-export class Routes extends Router {
+export class Routing extends Router {
   constructor(private readonly config?: { controllers: (new () => any)[] }) {
     super()
     this.config?.controllers.forEach(controller => this.registerControllerRoutes(controller));
@@ -25,38 +25,26 @@ export class Routes extends Router {
     response.setHeader('Content-type', 'application/json')
   }
 
-  private routeNotFoundResponse(request: IncomingMessage, response: ServerResponse) {
-    const url = request.url;
-    response.writeHead(404)
-    response.end(JSON.stringify({
-      exception: 'NotFoundException',
-      message: `Route with url [${request.method}] '${url}' not found`
-    }));
-  }
-
-  private throwResponse(response: ServerResponse, message: string) {
-    response.writeHead(500)
-    response.end(JSON.stringify({
-      exception: 'InternalServerError',
-      message
-    }));
-  }
-
   async handler(request: IncomingMessage, response: ServerResponse) {
     this.setDefaultResponseHeaders(response)
 
     if (request.method?.toLowerCase() === 'options') return this.options(response);
 
-    const route = this.getRoute(request.method, request.url);
+    try {
+      const route = this.getRoute(request.method, request.url);
 
-    if (!route) {
-      throw new NotFoundException(`Route [${request.method}]:${request.url} not found.`);
+      if (!route) {
+        throw new NotFoundException(`Route [${request.method}]: ${request.url} not found.`);
+      }
+      const output = await route.handler(request, response, this.io);
+      response.writeHead(route.status ?? 200);
+      response.end(JSON.stringify(output));
+    } catch (error: any) {
+      response.writeHead(error.status ?? 500);
+      response.end(JSON.stringify({
+        exception: error.constructor.name,
+        message: error.message
+      }));
     }
-
-    const output = await route.handler(request, response, this.io);
-
-    response.writeHead(route.status ?? 200);
-    response.end(output);
-
   }
 }

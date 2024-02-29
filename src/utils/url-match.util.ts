@@ -17,8 +17,8 @@ export function removeEmptySegments(segments: string[]): string[] {
  * @param url URL to split.
  * @returns List of URL segments.
  */
-export function splitUrlIntoSegments(url: string): string[] {
-  return url.split('/');
+export function splitUrlIntoSegments(url?: string): string[] {
+  return url?.split('/') ?? [];
 }
 
 /**
@@ -56,7 +56,7 @@ export function routeMatchesRequest(route_url_segments: string[], request_url_se
  * @param prefix Route prefix.
  * @returns true if the route matches the request URL, false otherwise.
  */
-export function routeMatchesUrl(route_url: string, request_url: string): boolean {
+export function routeMatchesUrl(route_url?: string, request_url?: string): boolean {
   const route_url_segments = splitUrlIntoSegments(route_url);
   const request_url_segments = splitUrlIntoSegments(request_url);
   const non_empty_route_url_segments = removeEmptySegments(route_url_segments);
@@ -74,7 +74,7 @@ export function routeMatchesUrl(route_url: string, request_url: string): boolean
  * @returns true if the route matches the request, false otherwise.
  */
 export function getRouteMatchKey(
-  request: { url: string, method: string },
+  request: { url?: string, method: string },
   route: { url: string, method: string },
 ): string | undefined {
   if (route.method && route.method.toLowerCase() !== request.method.toLowerCase()) {

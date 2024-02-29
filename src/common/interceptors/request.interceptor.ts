@@ -3,7 +3,7 @@ import { applyTransformers, getFunctionParameterIndices } from "@common/utils";
 import { IncomingMessage, ServerResponse } from "http";
 import { Server } from "socket.io";
 
-type Args = [IncomingMessage, ServerResponse, Server]
+type Args = [IncomingMessage, ServerResponse, Server | undefined]
 export const interceptor = (input: RouteDecoratorInput) => {
   return async (target: any, key: string, descriptor: PropertyDescriptor) => {
     const method = descriptor.value as Function;
