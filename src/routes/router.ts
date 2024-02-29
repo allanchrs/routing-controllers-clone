@@ -38,7 +38,6 @@ export class Router {
 
   private registerRouteHandler({ method, path, prefix, handler, status, controller }: RegisterRoute) {
     const route_url = this.getRouteUrl(prefix, path);
-    // console.log(`${method}|${route_url}`, { controller: controller.name })
     const route_key = `${method}|${route_url}`;
     this.routes.set(route_key, { status, handler, controller });
   }
