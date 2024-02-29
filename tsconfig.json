@@ -29,7 +29,8 @@
     "paths": {
       "@common/*": ["./src/common/*"],
       "@enums/*": ["./src/enums/*"],
-      "@utils/*": ["./src/utils/*"]
+      "@utils/*": ["./src/utils/*"],
+      "@exceptions/*": ["./src/exceptions/*"]
     }
   },
   "include": ["./src", "@types/fastify.d.ts", "@types/nestjs.d.ts"]

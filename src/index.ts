@@ -3,7 +3,7 @@ import https from 'https';
 import { AddressInfo } from 'net';
 import 'dotenv/config'
 import { Server } from 'socket.io'
-import { Routes } from './routes/routes';
+import { Routing } from './routes/routing';
 import { UserController } from './controllers/user.controller';
 import { logger } from './utils/logger/logger';
 
@@ -12,12 +12,12 @@ class ServerInit {
 
   initialize() {
     const ssl = this.getCertificates()
-    const routes = new Routes({
+    const routing = new Routing({
       controllers: [UserController]
     })
-    const server = https.createServer(ssl, routes.handler.bind(routes));
+    const server = https.createServer(ssl, routing.handler.bind(routing));
     const io = this.socket(server);
-    routes.setSocketInstance(io);
+    routing.setSocketInstance(io);
 
     const start = () => {
       const { address, port } = server.address() as AddressInfo;

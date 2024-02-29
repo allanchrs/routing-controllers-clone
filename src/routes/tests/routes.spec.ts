@@ -1,17 +1,19 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { Routes } from "../routes"
+import { Routing } from "../routing"
 import { MockDefaultController } from "./mocks/default-controller.mock";
 import { MockCustomController } from "./mocks/custom-controller.mock";
 import { MockEmptyController } from "./mocks/empty-controller.mock";
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 import { Socket } from "node:net";
+import { NotFoundException } from "@exceptions/not-fount.exception";
+import { RoutesNotFoundException } from "@exceptions/routes-not-found.exception";
 
 describe('#Routes', () => {
-  let routes: Routes;
+  let routing: Routing;
 
   beforeEach(() => {
-    routes = new Routes()
+    routing = new Routing()
   })
 
   const io = {
@@ -43,10 +45,10 @@ describe('#Routes', () => {
       should: 'set store socket io instance',
       input: () => params,
       setup: () => {
-        routes.setSocketInstance(io as any)
+        routing.setSocketInstance(io as any)
       },
       expected: () => {
-        expect(routes.io).toStrictEqual(io);
+        expect(routing.io).toStrictEqual(io);
       }
     },
     {
@@ -57,12 +59,14 @@ describe('#Routes', () => {
         input.values = () => Object.values<any>(input)
         return input
       },
-      setup: () => { },
+      setup: () => {
+        routing = new Routing({ controllers: [MockDefaultController] })
+      },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(404)
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: 'NotFoundException',
-          message: `Route with url [inexistent] '${params.request.url}' not found`
+          exception: NotFoundException.name,
+          message: `Route [inexistent]: ${params.request.url} not found.`
         }));
       }
     },
@@ -84,7 +88,7 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockDefaultController] })
+        routing = new Routing({ controllers: [MockDefaultController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(204);
@@ -100,7 +104,7 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockDefaultController] })
+        routing = new Routing({ controllers: [MockDefaultController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(200);
@@ -127,7 +131,7 @@ describe('#Routes', () => {
         return input;
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockDefaultController] })
+        routing = new Routing({ controllers: [MockDefaultController] })
       },
       expected: (err?: any) => {
         expect(params.response.writeHead).toHaveBeenCalledWith(201);
@@ -144,7 +148,7 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockCustomController] })
+        routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(200);
@@ -161,7 +165,7 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockCustomController] })
+        routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(201);
@@ -178,12 +182,12 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockCustomController] })
+        routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(500);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: 'InternalServerError',
+          exception: Error.name,
           message: 'Throw route'
         }));
       }
@@ -198,13 +202,13 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockCustomController] })
+        routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(404);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: 'NotFoundException',
-          message: `Route with url [GET] '/custom/inexistent' not found`
+          exception: NotFoundException.name,
+          message: `Route [GET]: /custom/inexistent not found.`
         }));
       }
     },
@@ -218,13 +222,13 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [] })
+        routing = new Routing({ controllers: [] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(404);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: 'NotFoundException',
-          message: `Route with url [GET] '/' not found`
+          exception: RoutesNotFoundException.name,
+          message: `No routes registered.`
         }));
       }
     },
@@ -238,13 +242,13 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockEmptyController] })
+        routing = new Routing({ controllers: [MockEmptyController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(404);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: 'NotFoundException',
-          message: `Route with url [GET] '/empty' not found`
+          exception: RoutesNotFoundException.name,
+          message: `No routes registered.`
         }));
       }
     },
@@ -258,13 +262,13 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockEmptyController] })
+        routing = new Routing({ controllers: [MockEmptyController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(500);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: 'InternalServerError',
-          message: `method not allowed`
+          exception: Error.name,
+          message: `Method not allowed.`
         }));
       }
     },
@@ -278,13 +282,13 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockEmptyController] })
+        routing = new Routing({ controllers: [MockEmptyController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(404);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: 'NotFoundException',
-          message: `Route with url [GET] 'undefined' not found`
+          exception: RoutesNotFoundException.name,
+          message: `No routes registered.`
         }));
       }
     },
@@ -298,7 +302,7 @@ describe('#Routes', () => {
         return input
       },
       setup: () => {
-        routes = new Routes({ controllers: [MockCustomController] })
+        routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(200);
@@ -313,7 +317,7 @@ describe('#Routes', () => {
       return;
     }
 
-    await routes.handler(...(input().values() as [IncomingMessage, ServerResponse]))
+    await routing.handler(...(input().values() as [IncomingMessage, ServerResponse]))
     expected()
   }, 10000)
 })
