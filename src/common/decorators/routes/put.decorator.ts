@@ -1,8 +1,18 @@
-import { HttpMethodEnum } from "../../enums"
-import { interceptor } from "../../interceptors/request.interceptor"
-import { RouteDecoratorInput, baseHttpDecorator } from "./base.decorator"
+import { HttpMethodEnum } from "../../enums";
+import { interceptor } from "../../interceptors/request.interceptor";
+import { RouteDecoratorInput, baseHttpDecorator } from "./base.decorator";
 
+/**
+ * Decorator function for defining PUT routes in a controller.
+ * @param input Optional input for configuring the route.
+ * @returns A decorator function.
+ */
 export const Put = (input?: RouteDecoratorInput) => {
-  return baseHttpDecorator({ ...input, method: HttpMethodEnum.PUT, interceptor })
-}
-
+  /**
+   * Decorator function that configures the route as a PUT endpoint.
+   * @param target The target object (prototype) of the class.
+   * @param propertyKey The name of the method.
+   * @param descriptor The property descriptor for the decorated method.
+   */
+  return baseHttpDecorator({ ...input, method: HttpMethodEnum.PUT, interceptor });
+};

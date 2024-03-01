@@ -11,36 +11,61 @@ export class Routing extends Router {
     this.config?.controllers.forEach(controller => this.registerControllerRoutes(controller));
   }
 
-  public io?: Server
+  /**
+   * Socket.io server instance.
+   */
+  public io?: Server;
 
-  setSocketInstance(io: Server) {
+  /**
+   * Sets the Socket.io server instance.
+   * @param io The Socket.io server instance.
+   */
+  setSocketInstance(io: Server): void {
     this.io = io;
   }
 
-  async options(response: ServerResponse) {
-    response.writeHead(HttpStatusCodeEnum.NO_CONTENT)
-    response.end()
+  /**
+   * Handles OPTIONS requests.
+   * @param response The server response object.
+   */
+  async options(response: ServerResponse): Promise<void> {
+    response.writeHead(HttpStatusCodeEnum.NO_CONTENT);
+    response.end();
   }
 
-  private setDefaultResponseHeaders(response: ServerResponse) {
-    response.setHeader('Access-Control-Allow-Origin', '*')
-    response.setHeader('Content-type', 'application/json')
+  /**
+   * Sets default response headers.
+   * @param response The server response object.
+   */
+  private setDefaultResponseHeaders(response: ServerResponse): void {
+    response.setHeader('Access-Control-Allow-Origin', '*');
+    response.setHeader('Content-type', 'application/json');
   }
 
-  private validateRequest(request: IncomingMessage) {
+  /**
+   * Validates the incoming request.
+   * @param request The incoming request object.
+   * @throws {BadRequestException} If the request is invalid.
+   */
+  private validateRequest(request: IncomingMessage): void {
     if (!request || !request.method || !request.url) {
       throw new BadRequestException("Bad request: Missing method or URL");
     }
   }
 
-  async handleRequest(request: IncomingMessage, response: ServerResponse) {
+  /**
+   * Handles incoming HTTP requests.
+   * @param request The incoming request object.
+   * @param response The server response object.
+   */
+  async handleRequest(request: IncomingMessage, response: ServerResponse): Promise<void> {
     if (request.method?.toUpperCase() === HttpMethodEnum.OPTIONS) {
-      return this.options(response)
-    };
+      return this.options(response);
+    }
 
     try {
       this.validateRequest(request);
-      this.setDefaultResponseHeaders(response)
+      this.setDefaultResponseHeaders(response);
 
       const method = request.method as string;
 

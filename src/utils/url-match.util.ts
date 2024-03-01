@@ -66,12 +66,9 @@ export function routeMatchesUrl(route_url?: string, request_url?: string): boole
 
 /**
  * Checks if a route matches the request.
- * @param route_url Route path.
- * @param request_url Request URL.
- * @param request_method Request method.
- * @param prefix Route prefix.
- * @param routeMethod Route method.
- * @returns true if the route matches the request, false otherwise.
+ * @param request URL and method of the request.
+ * @param route URL and method of the route.
+ * @returns A string representing the route match key, or undefined if no match is found.
  */
 export function getRouteMatchKey(
   request: { url?: string, method: string },
@@ -84,6 +81,4 @@ export function getRouteMatchKey(
   const route_match = routeMatchesUrl(route.url, request.url);
 
   return route_match ? `${route.method}|${route.url}` : undefined;
-
-
 }

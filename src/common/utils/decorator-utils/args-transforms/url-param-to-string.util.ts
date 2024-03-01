@@ -1,5 +1,8 @@
 import { IncomingMessage } from "http";
 
+/**
+ * Arguments for the urlParamToString function.
+ */
 type Args = {
   arg?: IncomingMessage,
   prefix?: string,
@@ -7,6 +10,11 @@ type Args = {
   param?: string
 }
 
+/**
+ * Converts a URL parameter to a string.
+ * @param {Args} args - Arguments for the urlParamToString function.
+ * @returns {Promise<string | undefined>} A promise that resolves to the string value of the URL parameter.
+ */
 export const urlParamToString = async ({ arg: request, path, prefix, param }: Args): Promise<string | undefined> => {
   if (!request || !path) return;
 
