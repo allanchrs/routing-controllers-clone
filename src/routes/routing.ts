@@ -2,6 +2,8 @@ import { IncomingMessage, ServerResponse } from "http";
 import { Server } from "socket.io";
 import { Router } from "./router";
 import { NotFoundException } from "@exceptions/not-fount.exception";
+import { BadRequestException } from "@exceptions/bad-request.exception";
+import { HttpMethodEnum, HttpStatusCodeEnum } from "@common/enums";
 
 export class Routing extends Router {
   constructor(private readonly config?: { controllers: (new () => any)[] }) {
@@ -16,7 +18,7 @@ export class Routing extends Router {
   }
 
   async options(response: ServerResponse) {
-    response.writeHead(204)
+    response.writeHead(HttpStatusCodeEnum.NO_CONTENT)
     response.end()
   }
 
@@ -25,22 +27,37 @@ export class Routing extends Router {
     response.setHeader('Content-type', 'application/json')
   }
 
-  async handler(request: IncomingMessage, response: ServerResponse) {
-    this.setDefaultResponseHeaders(response)
+  private validateRequest(request: IncomingMessage) {
+    if (!request || !request.method || !request.url) {
+      throw new BadRequestException("Bad request: Missing method or URL");
+    }
+  }
 
-    if (request.method?.toLowerCase() === 'options') return this.options(response);
+  async handleRequest(request: IncomingMessage, response: ServerResponse) {
+    if (request.method?.toUpperCase() === HttpMethodEnum.OPTIONS) {
+      return this.options(response)
+    };
 
     try {
-      const route = this.getRoute(request.method, request.url);
+      this.validateRequest(request);
+      this.setDefaultResponseHeaders(response)
+
+      const method = request.method as string;
+
+      const route = this.getRoute(method, request.url);
 
       if (!route) {
-        throw new NotFoundException(`Route [${request.method}]: ${request.url} not found.`);
+        throw new NotFoundException(`Route [${method}]: ${request.url} not found.`);
       }
+
       const output = await route.handler(request, response, this.io);
-      response.writeHead(route.status ?? 200);
+
+      const status_code = route.status ?? HttpStatusCodeEnum.OK;
+      response.writeHead(status_code);
       response.end(JSON.stringify(output));
     } catch (error: any) {
-      response.writeHead(error.status ?? 500);
+      const status_code = error.status ?? HttpStatusCodeEnum.INTERNAL_SERVER_ERROR;
+      response.writeHead(status_code);
       response.end(JSON.stringify({
         exception: error.constructor.name,
         message: error.message

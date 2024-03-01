@@ -15,7 +15,7 @@ class ServerInit {
     const routing = new Routing({
       controllers: [UserController]
     })
-    const server = https.createServer(ssl, routing.handler.bind(routing));
+    const server = https.createServer(ssl, routing.handleRequest.bind(routing));
     const io = this.socket(server);
     routing.setSocketInstance(io);
 

@@ -30,8 +30,9 @@
       "@common/*": ["./src/common/*"],
       "@enums/*": ["./src/enums/*"],
       "@utils/*": ["./src/utils/*"],
-      "@exceptions/*": ["./src/exceptions/*"]
+      "@exceptions/*": ["./src/exceptions/*"],
+      "@local-types/*": ["./src/types/*"]
     }
   },
-  "include": ["./src", "@types/fastify.d.ts", "@types/nestjs.d.ts"]
+  "include": ["./src"]
 }

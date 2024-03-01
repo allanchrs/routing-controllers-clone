@@ -7,7 +7,8 @@ import { randomUUID } from "crypto";
 import { Readable } from "stream";
 import { Socket } from "node:net";
 import { NotFoundException } from "@exceptions/not-fount.exception";
-import { RoutesNotFoundException } from "@exceptions/routes-not-found.exception";
+import { NoRoutesRegisteredException } from "@exceptions/no-routes-registered.exception";
+import { BadRequestException } from "@exceptions/bad-request.exception";
 
 describe('#Routes', () => {
   let routing: Routing;
@@ -227,8 +228,8 @@ describe('#Routes', () => {
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(404);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: RoutesNotFoundException.name,
-          message: `No routes registered.`
+          exception: NoRoutesRegisteredException.name,
+          message: `No routes registered in the router.`
         }));
       }
     },
@@ -247,8 +248,8 @@ describe('#Routes', () => {
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(404);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: RoutesNotFoundException.name,
-          message: `No routes registered.`
+          exception: NoRoutesRegisteredException.name,
+          message: `No routes registered in the router.`
         }));
       }
     },
@@ -265,10 +266,10 @@ describe('#Routes', () => {
         routing = new Routing({ controllers: [MockEmptyController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(500);
+        expect(params.response.writeHead).toHaveBeenCalledWith(400);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: Error.name,
-          message: `Method not allowed.`
+          exception: BadRequestException.name,
+          message: `Bad request: Missing method or URL`
         }));
       }
     },
@@ -285,10 +286,10 @@ describe('#Routes', () => {
         routing = new Routing({ controllers: [MockEmptyController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(404);
+        expect(params.response.writeHead).toHaveBeenCalledWith(400);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: RoutesNotFoundException.name,
-          message: `No routes registered.`
+          exception: BadRequestException.name,
+          message: `Bad request: Missing method or URL`
         }));
       }
     },
@@ -317,7 +318,7 @@ describe('#Routes', () => {
       return;
     }
 
-    await routing.handler(...(input().values() as [IncomingMessage, ServerResponse]))
+    await routing.handleRequest(...(input().values() as [IncomingMessage, ServerResponse]))
     expected()
   }, 10000)
 })

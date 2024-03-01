@@ -3,4 +3,5 @@ export enum HttpMethodEnum {
   GET = 'GET',
   PUT = 'PUT',
   DELETE = 'DELETE',
+  OPTIONS = 'OPTIONS',
 }

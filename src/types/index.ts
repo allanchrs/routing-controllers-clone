@@ -1,3 +1,6 @@
 export * from './request-handler.type'
 export * from './controller-routes.type'
 export * from './route-controller.type'
+export * from './map-router.type'
+export * from './register-route.type'
+export * from './controller.type'
