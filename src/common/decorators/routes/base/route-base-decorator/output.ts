@@ -1,0 +1,1 @@
+export type Output = (target: any, propertyKey: string, descriptor: PropertyDescriptor) => any

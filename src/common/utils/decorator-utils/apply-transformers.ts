@@ -1,13 +1,14 @@
-import { RouteDecoratorInput } from "@common/decorators";
 import { transformers } from "./transformers";
 import { IncomingMessage, ServerResponse } from "http";
 import { Server } from "socket.io";
 import { http_args_mapper_params } from "./args-maps/args-map.util";
+import { RouteDecoratorOptions } from "@local-types/route-decorator-options.type";
 
 type Args = [IncomingMessage, ServerResponse, Server | undefined]
+
 type ApplyTransformersArgs = {
-  args: Args, indices: any[], target: any
-} & RouteDecoratorInput
+  args: Args, indices: any[], target: any, path?: string
+} & RouteDecoratorOptions
 
 /**
  * Applies transformers to modify or validate method parameters based on the provided configuration.

@@ -7,25 +7,20 @@ export class MockCustomController {
     return { success: true, path: '/' }
   }
 
-  @Get({ path: 'param/:id' })
+  @Get('param/:id')
   getWithParam(
     @Param('id') id: string
   ) {
     return { success: true, path: `param/${id}` }
   }
 
-  @Post({ path: 'custom', status: 201 })
+  @Post('custom', { status: 201 })
   getCustom() {
     return { success: true, path: 'custom' }
   }
 
-  @Get({ path: 'throw' })
+  @Get('throw')
   getThrow() {
     throw new Error("Throw route");
-  }
-
-  @Get({ path: 'test' })
-  getTest() {
-    throw new Error("Test Throw route");
   }
 }

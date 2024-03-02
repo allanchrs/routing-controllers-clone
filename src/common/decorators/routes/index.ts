@@ -1,4 +1,4 @@
-export * from './base.decorator';
+export * from './base';
 export * from './get.decorator';
 export * from './post.decorator';
 export * from './put.decorator';

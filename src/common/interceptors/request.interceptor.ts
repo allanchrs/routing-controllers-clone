@@ -1,5 +1,5 @@
-import { RouteDecoratorInput } from "@common/decorators";
 import { applyTransformers, getFunctionParameterIndices } from "@common/utils";
+import { RouteDecoratorOptions } from "@local-types/route-decorator-options.type";
 import { IncomingMessage, ServerResponse } from "http";
 import { Server } from "socket.io";
 
@@ -11,7 +11,7 @@ type Args = [IncomingMessage, ServerResponse, Server | undefined];
  * @param input Configuration for the interceptor.
  * @returns A function that acts as the interceptor.
  */
-export const interceptor = (input: RouteDecoratorInput) => {
+export const interceptor = (input: RouteDecoratorOptions) => {
   return async (target: any, key: string, descriptor: PropertyDescriptor) => {
     const method = descriptor.value as Function;
 

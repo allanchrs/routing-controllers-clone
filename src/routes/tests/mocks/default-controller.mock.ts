@@ -7,7 +7,7 @@ export class MockDefaultController {
     return { success: true, path: '/' }
   }
 
-  @Post({ path: 'custom', status: 201 })
+  @Post('custom', { status: 201 })
   postCustom(
     @Body() body: any
   ) {

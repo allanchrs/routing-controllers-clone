@@ -11,7 +11,7 @@ export class UserController {
    * @param body The request body containing user data.
    * @returns The created user object.
    */
-  @Post({ path: 'create', status: 201 })
+  @Post('create', { status: 201 })
   async create(
     @Body() body: any,
   ): Promise<any> {
@@ -24,7 +24,7 @@ export class UserController {
    * @param id The ID of the user to be updated.
    * @returns The updated user object.
    */
-  @Put({ path: 'update/:id', status: 201 })
+  @Put('update/:id', { status: 201 })
   async update(
     @Body() body: any,
     @Param('id') id: string
