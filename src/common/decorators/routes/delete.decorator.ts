@@ -9,12 +9,12 @@ import { routeBaseDecorator } from "./base";
  * @param options Optional input for configuring the route.
  * @returns A decorator function.
  */
-export const Delete = (path?: string, input?: RouteDecoratorOptions) => {
+export const Delete = (path?: string, options?: RouteDecoratorOptions) => {
   /**
    * Decorator function that configures the route as a DELETE endpoint.
    * @param target The target object (prototype) of the class.
    * @param propertyKey The name of the method.
    * @param descriptor The property descriptor for the decorated method.
    */
-  return routeBaseDecorator({ ...input, path, method: HttpMethodEnum.DELETE, interceptor });
+  return routeBaseDecorator({ ...options, path, method: HttpMethodEnum.DELETE, interceptor });
 };
