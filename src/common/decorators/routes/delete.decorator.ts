@@ -4,7 +4,7 @@ import { interceptor } from "../../interceptors/request.interceptor";
 import { routeBaseDecorator } from "./base";
 
 /**
- * Decorator function for defining POST routes in a controller.
+ * Decorator function for defining DELETE routes in a controller.
  * @param path Optional path of route.
  * @param options Optional input for configuring the route.
  * @returns A decorator function.

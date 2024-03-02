@@ -4,17 +4,17 @@ import { interceptor } from "../../interceptors/request.interceptor";
 import { routeBaseDecorator } from "./base";
 
 /**
- * Decorator function for defining PUT routes in a controller.
+ * Decorator function for defining PATCH routes in a controller.
  * @param path Optional path of route.
  * @param options Optional input for configuring the route.
  * @returns A decorator function.
  */
-export const Put = (path?: string, options?: RouteDecoratorOptions) => {
+export const Patch = (path?: string, options?: RouteDecoratorOptions) => {
   /**
    * Decorator function that configures the route as a PUT endpoint.
    * @param target The target object (prototype) of the class.
    * @param propertyKey The name of the method.
    * @param descriptor The property descriptor for the decorated method.
    */
-  return routeBaseDecorator({ ...options, path, method: HttpMethodEnum.PUT, interceptor });
+  return routeBaseDecorator({ ...options, path, method: HttpMethodEnum.PATCH, interceptor });
 };
