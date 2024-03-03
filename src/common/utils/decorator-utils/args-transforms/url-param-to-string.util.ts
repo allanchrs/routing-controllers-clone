@@ -1,21 +1,11 @@
-import { IncomingMessage } from "http";
-
-/**
- * Arguments for the urlParamToString function.
- */
-type Args = {
-  arg?: IncomingMessage,
-  prefix?: string,
-  path?: string,
-  param?: string
-}
+import { TransformArgs } from "@local-types/transform-args-.type";
 
 /**
  * Converts a URL parameter to a string.
- * @param {Args} args - Arguments for the urlParamToString function.
+ * @param {TransformArgs} args - Arguments for the urlParamToString function.
  * @returns {Promise<string | undefined>} A promise that resolves to the string value of the URL parameter.
  */
-export const urlParamToString = async ({ arg: request, path, prefix, param }: Args): Promise<string | undefined> => {
+export const urlParamToString = async ({ arg: request, path, prefix, param }: TransformArgs): Promise<string | undefined> => {
   if (!request || !path) return;
 
   const url = prefix ? `${prefix}/${path}` : path;

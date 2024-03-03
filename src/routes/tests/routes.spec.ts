@@ -4,17 +4,38 @@ import { MockDefaultController } from "./mocks/default-controller.mock";
 import { MockCustomController } from "./mocks/custom-controller.mock";
 import { MockEmptyController } from "./mocks/empty-controller.mock";
 import { randomUUID } from "crypto";
-import { Readable } from "stream";
 import { Socket } from "node:net";
 import { NotFoundException } from "@exceptions/not-fount.exception";
 import { NoRoutesRegisteredException } from "@exceptions/no-routes-registered.exception";
 import { BadRequestException } from "@exceptions/bad-request.exception";
+import { HttpMethodEnum, HttpStatusCodeEnum } from "@common/enums";
 
-describe('#Routes', () => {
+describe('[Routing & Router]', () => {
   let routing: Routing;
+  let params: { request: IncomingMessage, response: Partial<ServerResponse> } = {
+    request: new IncomingMessage(new Socket()),
+    response: {
+      setHeader: jest.fn(),
+      writeHead: jest.fn(),
+      end: jest.fn()
+    },
+  };
+
+  let args: () => any = () => null;
 
   beforeEach(() => {
     routing = new Routing()
+    params = {
+      request: new IncomingMessage(new Socket()),
+      response: {
+        setHeader: jest.fn(),
+        writeHead: jest.fn(),
+        end: jest.fn()
+      },
+    }
+    params.request.url = '/'
+    params.request.method = 'GET'
+    args = () => Object.values(params);
   })
 
   const io = {
@@ -22,29 +43,21 @@ describe('#Routes', () => {
     emit: (event: any, message: any) => { }
   }
 
-  const params = {
-    request: {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      method: 'GET',
-      url: '/',
-      body: jest.fn()
-    },
-    response: {
-      setHeader: jest.fn(),
-      writeHead: jest.fn(),
-      end: jest.fn()
-    },
-    values: () => Object.values<any>(params)
+  const input = (method?: HttpMethodEnum, url?: string, body?: object) => {
+    const copy = { ...params }
+    copy.request.method = method;
+    copy.request.url = url;
+    if (body) copy.request.push(JSON.stringify(body));
+    copy.request.push(null);
+    return args = () => Object.values(copy);
   }
 
   const id = randomUUID();
 
   it.each([
     {
-      should: 'set store socket io instance',
-      input: () => params,
+      should: 'Should store the socket.io instance',
+      input: () => input(),
       setup: () => {
         routing.setSocketInstance(io as any)
       },
@@ -53,27 +66,8 @@ describe('#Routes', () => {
       }
     },
     {
-      should: 'given an inexistend route it should choosen default route',
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'inexistent';
-        input.values = () => Object.values<any>(input)
-        return input
-      },
-      setup: () => {
-        routing = new Routing({ controllers: [MockDefaultController] })
-      },
-      expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(404)
-        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
-          exception: NotFoundException.name,
-          message: `Route [inexistent]: ${params.request.url} not found.`
-        }));
-      }
-    },
-    {
-      should: 'it set any request with CORS enabled and Content-type application/json',
-      input: () => params,
+      should: 'Should set CORS headers and Content-Type to application/json for any request',
+      input: () => input(HttpMethodEnum.GET, '/'),
       setup: () => { },
       expected: () => {
         expect(params.response.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', '*');
@@ -81,112 +75,82 @@ describe('#Routes', () => {
       }
     },
     {
-      should: 'given method OPTIONS it should choose options route',
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'OPTIONS'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[INEXISTEND][/]: Should return BadRequestException for an invalid method route`,
+      input: () => input('INEXISTEND' as HttpMethodEnum, '/'),
       setup: () => {
         routing = new Routing({ controllers: [MockDefaultController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(204);
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.BAD_REQUEST)
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
+          exception: BadRequestException.name,
+          message: `Bad request: "INEXISTEND" is a invalid method http`
+        }));
+      }
+    },
+    {
+      should: `[${HttpMethodEnum.OPTIONS}][/]: Should return ${HttpStatusCodeEnum.NO_CONTENT} status for OPTIONS method`,
+      input: () => input(HttpMethodEnum.OPTIONS, '/'),
+      setup: () => {
+        routing = new Routing({ controllers: [MockDefaultController] })
+      },
+      expected: () => {
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.NO_CONTENT);
         expect(params.response.end).toHaveBeenCalled();
       }
     },
     {
-      should: `given GET method and '/' route path to be returns body response from MockDefaultController`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'GET'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[${HttpMethodEnum.GET}][/]: Should return ${HttpStatusCodeEnum.OK} status response from MockDefaultController`,
+      input: () => input(HttpMethodEnum.GET, '/'),
       setup: () => {
         routing = new Routing({ controllers: [MockDefaultController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(200);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: '/' }));
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.OK);
       }
     },
     {
-      should: `given POST method and '/custom' route path to be returns body response from MockDefaultController`,
-      input: () => {
-        const body = JSON.stringify({ id });
-        const readableStream = new Readable();
-        readableStream.push(body);
-        readableStream.push(null);
-        const request = new IncomingMessage(new Socket());
-        request.push(body)
-        request.push(null);
-        request.method = 'POST';
-        request.url = '/custom';
-        const input = {
-          ...params,
-          request,
-          values: () => Object.values<any>(input)
-        }
-        return input;
-      },
+      should: `[${HttpMethodEnum.POST}][/]: Should return ${HttpStatusCodeEnum.CREATED} status response from MockDefaultController`,
+      input: () => input(HttpMethodEnum.POST, '/custom', { id }),
       setup: () => {
         routing = new Routing({ controllers: [MockDefaultController] })
       },
       expected: (err?: any) => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(201);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'custom', id }));
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.CREATED);
       }
     },
     {
-      should: `given GET method and '/' route path to be returns body response from MockCustomController`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'GET'
-        input.request.url = '/custom'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[${HttpMethodEnum.GET}][/]: Should return ${HttpStatusCodeEnum.OK} status response from MockCustomController`,
+      input: () => input(HttpMethodEnum.GET, '/custom'),
       setup: () => {
         routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(200);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: '/' }));
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.OK);
       }
     },
     {
-      should: `given POST method and '/custom' route path to be returns body response from MockCustomController`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'POST'
-        input.request.url = '/custom/custom'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[${HttpMethodEnum.POST}][/custom] Should return ${HttpStatusCodeEnum.CREATED} status response from MockCustomController`,
+      input: () => input(HttpMethodEnum.POST, '/custom/custom', { value: 'value' }),
       setup: () => {
         routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(201);
-        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'custom' }));
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'custom', body: { value: 'value' } }));
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.CREATED);
       }
     },
     {
-      should: `given GET method and '/throw' route path to be returns body response with error messages`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'GET'
-        input.request.url = '/custom/throw'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[${HttpMethodEnum.GET}][/custom/throw] Should return ${HttpStatusCodeEnum.INTERNAL_SERVER_ERROR} status response from MockCustomController`,
+      input: () => input(HttpMethodEnum.GET, '/custom/throw'),
       setup: () => {
         routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(500);
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.INTERNAL_SERVER_ERROR);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
           exception: Error.name,
           message: 'Throw route'
@@ -194,19 +158,13 @@ describe('#Routes', () => {
       }
     },
     {
-      should: `given GET method and '/inexistent' route path to be returns body response with error messages`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'GET'
-        input.request.url = '/custom/inexistent'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[${HttpMethodEnum.GET}][/custom/inexistent] Should return ${HttpStatusCodeEnum.NOT_FOUND} status response from MockCustomController`,
+      input: () => input(HttpMethodEnum.GET, '/custom/inexistent'),
       setup: () => {
         routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(404);
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.NOT_FOUND);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
           exception: NotFoundException.name,
           message: `Route [GET]: /custom/inexistent not found.`
@@ -214,19 +172,13 @@ describe('#Routes', () => {
       }
     },
     {
-      should: `given empty array of controllers and returns not found route response`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'GET'
-        input.request.url = '/'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[${HttpMethodEnum.GET}][/] Should return ${HttpStatusCodeEnum.NOT_FOUND} status response for no controllers registered`,
+      input: () => input(HttpMethodEnum.GET, '/'),
       setup: () => {
         routing = new Routing({ controllers: [] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(404);
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.NOT_FOUND);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
           exception: NoRoutesRegisteredException.name,
           message: `No routes registered in the router.`
@@ -234,19 +186,13 @@ describe('#Routes', () => {
       }
     },
     {
-      should: `given empty controllers and returns not found route response`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'GET'
-        input.request.url = '/empty'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[${HttpMethodEnum.GET}][/empty] Should return ${HttpStatusCodeEnum.NOT_FOUND} status response from MockEmptyController`,
+      input: () => input(HttpMethodEnum.GET, '/empty'),
       setup: () => {
         routing = new Routing({ controllers: [MockEmptyController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(404);
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.NOT_FOUND);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
           exception: NoRoutesRegisteredException.name,
           message: `No routes registered in the router.`
@@ -254,63 +200,64 @@ describe('#Routes', () => {
       }
     },
     {
-      should: `given undefined method and throw error response`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = undefined as unknown as string
-        input.request.url = '/empty'
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[undefined][/empty] Should return ${HttpStatusCodeEnum.BAD_REQUEST} status response from MockEmptyController`,
+      input: () => input(undefined, '/empty'),
       setup: () => {
         routing = new Routing({ controllers: [MockEmptyController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(400);
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.BAD_REQUEST);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
           exception: BadRequestException.name,
-          message: `Bad request: Missing method or URL`
+          message: `Bad request: Missing method`
         }));
       }
     },
     {
-      should: `given undefined request url and return not found exception response`,
-      input: () => {
-        const input = { ...params }
-        input.request.method = 'GET'
-        input.request.url = undefined as unknown as string
-        input.values = () => Object.values<any>(input)
-        return input
-      },
+      should: `[${HttpMethodEnum.GET}][undefined] Should return ${HttpStatusCodeEnum.BAD_REQUEST} status response from MockEmptyController`,
+      input: () => input(HttpMethodEnum.GET, undefined),
       setup: () => {
         routing = new Routing({ controllers: [MockEmptyController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(400);
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.BAD_REQUEST);
         expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
           exception: BadRequestException.name,
-          message: `Bad request: Missing method or URL`
+          message: `Bad request: Missing URL`
         }));
       }
     },
     {
-      should: `given param/:id request url and return success`,
+      should: `[${HttpMethodEnum.GET}][/custom/param/:id] Should return ${HttpStatusCodeEnum.OK} status response from MockCustomController`,
+      input: () => input(HttpMethodEnum.GET, `custom/param/${id}`),
+      setup: () => {
+        routing = new Routing({ controllers: [MockCustomController] })
+      },
+      expected: () => {
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.OK);
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: `param/${id}` }));
+      }
+    },
+    {
+      should: `Should return ${HttpStatusCodeEnum.INTERNAL_SERVER_ERROR} status response when request object is undefined`,
       input: () => {
         const input = { ...params }
-        input.request.method = 'GET'
-        input.request.url = `custom/param/${id}`
-        input.values = () => Object.values<any>(input)
-        return input
+        input.request = null as unknown as any
+        args = () => Object.values<any>(input)
+        return args
       },
       setup: () => {
         routing = new Routing({ controllers: [MockCustomController] })
       },
       expected: () => {
-        expect(params.response.writeHead).toHaveBeenCalledWith(200);
-        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: `param/${id}` }));
+        expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.INTERNAL_SERVER_ERROR);
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({
+          exception: Error.name,
+          message: `Invalid Request`
+        }));
       }
     },
-  ])('Should $should', async ({ input, expected, setup }) => {
+  ])('$should', async ({ input, expected, setup }) => {
     if (setup) setup();
 
     if (!input) {
@@ -318,7 +265,9 @@ describe('#Routes', () => {
       return;
     }
 
-    await routing.handleRequest(...(input().values() as [IncomingMessage, ServerResponse]))
+    const values = input();
+
+    await routing.handleRequest(...(values() as [IncomingMessage, ServerResponse]))
     expected()
-  }, 10000)
+  }, 0)
 })

@@ -1,30 +1,26 @@
+import { TransformArgs } from "@local-types/transform-args-.type";
 import { IncomingMessage } from "http";
 
 /**
- * Arguments for the bodyToJson function.
- */
-type Args = {
-  arg?: IncomingMessage,
-  prefix?: string,
-  path?: string,
-  param?: string
-}
-
-/**
  * Converts the body of an incoming message to JSON.
- * @param {Args} args - Arguments for the bodyToJson function.
+ * @param {TransformArgs} args - Arguments for the bodyToJson function.
  * @returns {Promise<any>} A promise that resolves to the parsed JSON body.
  */
-export const bodyToJson = ({ arg: request }: Args): Promise<any> => {
+export const bodyToJson = ({ arg: request }: TransformArgs): Promise<any> => {
+
   return new Promise((resolve, reject) => {
-    if (!request) return;
-    let body = '';
+    if (!request) return resolve(null);
+
+    if (!request.on) return resolve(null);
+
+    let body: any[] = [];
+
     request.on('data', chunk => {
-      body += chunk;
+      body.push(chunk);
     });
     request.on('end', () => {
       try {
-        const json = JSON.parse(body);
+        const json = body.length ? JSON.parse(body.join()) : null;
         resolve(json);
       } catch (error) {
         reject(error);

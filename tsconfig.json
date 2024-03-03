@@ -29,6 +29,7 @@
     "paths": {
       "@common/*": ["./src/common/*"],
       "@enums/*": ["./src/enums/*"],
+      "@interfaces/*": ["./src/interfaces/*"],
       "@utils/*": ["./src/utils/*"],
       "@exceptions/*": ["./src/exceptions/*"],
       "@local-types/*": ["./src/types/*"]

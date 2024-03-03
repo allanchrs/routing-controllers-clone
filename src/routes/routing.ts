@@ -4,6 +4,7 @@ import { Router } from "./router";
 import { NotFoundException } from "@exceptions/not-fount.exception";
 import { BadRequestException } from "@exceptions/bad-request.exception";
 import { HttpMethodEnum, HttpStatusCodeEnum } from "@common/enums";
+import { bodyToJson } from "@common/utils";
 
 export class Routing extends Router {
   constructor(private readonly config?: { controllers: (new () => any)[] }) {
@@ -48,9 +49,27 @@ export class Routing extends Router {
    * @throws {BadRequestException} If the request is invalid.
    */
   private validateRequest(request: IncomingMessage): void {
-    if (!request || !request.method || !request.url) {
-      throw new BadRequestException("Bad request: Missing method or URL");
+    if (!request) {
+      throw new Error("Invalid Request");
     }
+
+    if (!request.method) {
+      throw new BadRequestException("Bad request: Missing method");
+    }
+
+    if (!request.url) {
+      throw new BadRequestException("Bad request: Missing URL");
+    }
+
+    const allowed_methods = Object.entries(HttpMethodEnum).map(([key]) => key);
+
+    if (!allowed_methods.includes(request.method)) {
+      throw new BadRequestException(`Bad request: "${request.method}" is a invalid method http`);
+    }
+  }
+
+  private async setJsonBody(request: IncomingMessage): Promise<void> {
+    Object.assign(request, { body: await bodyToJson({ arg: request }) })
   }
 
   /**
@@ -59,13 +78,15 @@ export class Routing extends Router {
    * @param response The server response object.
    */
   async handleRequest(request: IncomingMessage, response: ServerResponse): Promise<void> {
-    if (request.method?.toUpperCase() === HttpMethodEnum.OPTIONS) {
-      return this.options(response);
-    }
 
     try {
       this.validateRequest(request);
       this.setDefaultResponseHeaders(response);
+
+      if ((request.method as string).toUpperCase() === HttpMethodEnum.OPTIONS) {
+        return this.options(response);
+      }
+
 
       const method = request.method as string;
 
@@ -74,6 +95,8 @@ export class Routing extends Router {
       if (!route) {
         throw new NotFoundException(`Route [${method}]: ${request.url} not found.`);
       }
+
+      await this.setJsonBody(request);
 
       const output = await route.handler(request, response, this.io);
 

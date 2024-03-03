@@ -1,1 +1,1 @@
-export * from './request.interceptor'
+export * from './route-params.interceptor'

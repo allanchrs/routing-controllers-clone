@@ -3,8 +3,9 @@ import { IncomingMessage, ServerResponse } from "http";
 import { Server } from "socket.io";
 import { http_args_mapper_params } from "./args-maps/args-map.util";
 import { RouteDecoratorOptions } from "@local-types/route-decorator-options.type";
+import { IRequest } from "@interfaces/request.interface";
 
-type Args = [IncomingMessage, ServerResponse, Server | undefined]
+type Args = [IRequest, ServerResponse, Server | undefined]
 
 type ApplyTransformersArgs = {
   args: Args, indices: any[], target: any, path?: string

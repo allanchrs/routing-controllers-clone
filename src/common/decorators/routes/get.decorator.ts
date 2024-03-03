@@ -1,7 +1,7 @@
 import { HttpMethodEnum } from "../../enums";
-import { interceptor } from "../../interceptors/request.interceptor";
 import { RouteDecoratorOptions } from "@local-types/route-decorator-options.type";
 import { routeBaseDecorator } from "./base";
+import { routeParamsInterceptor } from "@common/interceptors";
 
 /**
  * Decorator function for defining GET routes in a controller.
@@ -16,5 +16,5 @@ export const Get = (path?: string, options?: RouteDecoratorOptions) => {
    * @param propertyKey The name of the method.
    * @param descriptor The property descriptor for the decorated method.
    */
-  return routeBaseDecorator({ ...options, path, method: HttpMethodEnum.GET, interceptor });
+  return routeBaseDecorator({ ...options, path, method: HttpMethodEnum.GET, interceptor: routeParamsInterceptor });
 };

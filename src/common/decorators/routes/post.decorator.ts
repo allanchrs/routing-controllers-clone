@@ -1,7 +1,7 @@
 import { RouteDecoratorOptions } from "@local-types/route-decorator-options.type";
 import { HttpMethodEnum } from "../../enums";
-import { interceptor } from "../../interceptors/request.interceptor";
 import { routeBaseDecorator } from "./base";
+import { routeParamsInterceptor } from "@common/interceptors";
 
 /**
  * Decorator function for defining POST routes in a controller.
@@ -16,5 +16,5 @@ export const Post = (path?: string, options?: RouteDecoratorOptions) => {
    * @param propertyKey The name of the method.
    * @param descriptor The property descriptor for the decorated method.
    */
-  return routeBaseDecorator({ ...options, path, method: HttpMethodEnum.POST, interceptor });
+  return routeBaseDecorator({ ...options, path, method: HttpMethodEnum.POST, interceptor: routeParamsInterceptor });
 };

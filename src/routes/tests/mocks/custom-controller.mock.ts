@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Post } from "@common/decorators";
+import { Controller, Get, Param, Post, Req } from "@common/decorators";
+import { IRequest } from "@interfaces/request.interface";
 
 @Controller('custom')
 export class MockCustomController {
@@ -15,8 +16,10 @@ export class MockCustomController {
   }
 
   @Post('custom', { status: 201 })
-  getCustom() {
-    return { success: true, path: 'custom' }
+  getCustom(
+    @Req() req: IRequest
+  ) {
+    return { success: true, path: 'custom', body: req.body }
   }
 
   @Get('throw')
