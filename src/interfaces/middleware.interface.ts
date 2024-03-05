@@ -1,5 +1,7 @@
-import { IncomingMessage } from "http";
+import { ServerResponse } from "http";
+import { Server } from "socket.io";
+import { IRequest } from "./request.interface";
 
 export abstract class IMiddleware {
-  abstract handle: (request: IncomingMessage, response: IncomingMessage) => Promise<void>
+  abstract handler: (request: IRequest, response: ServerResponse, socket?: Server) => Promise<void>
 }

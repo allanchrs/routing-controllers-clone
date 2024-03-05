@@ -5,6 +5,8 @@ import { NotFoundException } from "@exceptions/not-fount.exception";
 import { BadRequestException } from "@exceptions/bad-request.exception";
 import { HttpMethodEnum, HttpStatusCodeEnum } from "@common/enums";
 import { bodyToJson } from "@common/utils";
+import { MapRouter } from "@local-types/map-router.type";
+import { logger } from "@utils/logger/logger";
 
 export class Routing extends Router {
   constructor(private readonly config?: { controllers: (new () => any)[] }) {
@@ -72,6 +74,18 @@ export class Routing extends Router {
     Object.assign(request, { body: await bodyToJson({ arg: request }) })
   }
 
+  private async runMiddlewares(route: MapRouter, args: [IncomingMessage, ServerResponse]): Promise<void> {
+    if (!route.middlewares) return;
+
+    for await (const middleware of route.middlewares) {
+      await middleware.handler.apply(middleware, [...args, this.io])
+    }
+  }
+
+  private requestLogger(route: MapRouter): void {
+    logger.info(`${new Date().toISOString()}: [${route.method}] /${this.getRouteUrl(route.prefix, route.path)}`)
+  }
+
   /**
    * Handles incoming HTTP requests.
    * @param request The incoming request object.
@@ -87,7 +101,6 @@ export class Routing extends Router {
         return this.options(response);
       }
 
-
       const method = request.method as string;
 
       const route = this.getRoute(method, request.url);
@@ -96,8 +109,9 @@ export class Routing extends Router {
         throw new NotFoundException(`Route [${method}]: ${request.url} not found.`);
       }
 
+      this.requestLogger(route);
       await this.setJsonBody(request);
-
+      await this.runMiddlewares(route, [request, response]);
       const output = await route.handler(request, response, this.io);
 
       const status_code = route.status ?? HttpStatusCodeEnum.OK;

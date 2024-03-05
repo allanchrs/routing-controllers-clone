@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Post } from "@common/decorators";
+import { Body, Controller, Get, Post, Req } from "@common/decorators";
+import { Middleware } from "./middleware.mock";
+import { IRequest } from "@interfaces/request.interface";
 
 @Controller()
 export class MockDefaultController {
@@ -7,10 +9,11 @@ export class MockDefaultController {
     return { success: true, path: '/' }
   }
 
-  @Post('custom', { status: 201 })
+  @Post('custom', { status: 201, middlewares: [Middleware] })
   postCustom(
-    @Body() body: any
+    @Body() body: any,
+    @Req() req: IRequest
   ) {
-    return { success: true, path: 'custom', ...body }
+    return { success: true, path: 'custom', ...body, authorization: req.headers.authorization }
   }
 }

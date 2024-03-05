@@ -117,7 +117,7 @@ describe('[Routing & Router]', () => {
         routing = new Routing({ controllers: [MockDefaultController] })
       },
       expected: (err?: any) => {
-        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'custom', id }));
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: 'custom', id, authorization: 'some-authorization' }));
         expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.CREATED);
       }
     },
@@ -235,7 +235,7 @@ describe('[Routing & Router]', () => {
       },
       expected: () => {
         expect(params.response.writeHead).toHaveBeenCalledWith(HttpStatusCodeEnum.OK);
-        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: `param/${id}` }));
+        expect(params.response.end).toHaveBeenCalledWith(JSON.stringify({ success: true, path: `param/${id}`, authorization: 'some-authorization' }));
       }
     },
     {

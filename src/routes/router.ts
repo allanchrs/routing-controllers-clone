@@ -4,6 +4,7 @@ import { Controller } from "@local-types/controller.type";
 import { MapRouter } from "@local-types/map-router.type";
 import { RegisterRoute } from "@local-types/register-route.type";
 import { getPrototypeValue } from "@utils/get-prototype-value.util";
+import { logger } from "@utils/logger/logger";
 import { getRouteMatchKey } from "@utils/url-match.util";
 
 /**
@@ -26,7 +27,7 @@ export class Router {
    * @param path The route path.
    * @returns The constructed route URL.
    */
-  private getRouteUrl(prefix?: string, path?: string): string {
+  protected getRouteUrl(prefix?: string, path?: string): string {
     if (prefix && path) {
       return `${prefix}/${path}`;
     } else if (prefix && !path) {
@@ -38,14 +39,24 @@ export class Router {
     }
   }
 
+  private loggerMapedRoute(method: string, url: string): void {
+    logger.info(`Route: [${method}] /${url}`)
+  }
+
   /**
    * Registers a route handler.
    * @param param0 The route registration details.
    */
-  private registerRouteHandler({ method, path, prefix, handler, status, controller }: RegisterRoute) {
+  private registerRouteHandler({
+    method,
+    path,
+    prefix,
+    ...rest
+  }: RegisterRoute) {
     const route_url = this.getRouteUrl(prefix, path);
     const route_key = `${method}${this.ROUTE_SEPARATOR}${route_url}`;
-    this.routes.set(route_key, { status, handler, controller });
+    this.loggerMapedRoute(method, route_url);
+    this.routes.set(route_key, { prefix, path, method, ...rest });
   }
 
   /**
@@ -53,7 +64,7 @@ export class Router {
    * @param controller The controller containing route definitions.
    */
   protected registerControllerRoutes(controller: Controller) {
-    const { routes, prefix } = getPrototypeValue<Controller, ControllerRoutes>(controller);
+    const { routes, prefix, middlewares } = getPrototypeValue<Controller, ControllerRoutes>(controller);
 
     if (!routes) return;
 
@@ -64,7 +75,8 @@ export class Router {
         prefix,
         status,
         controller,
-        handler: handler.bind(controller)
+        handler: handler.bind(controller),
+        middlewares: middlewares?.map((Middleware) => new Middleware())
       });
     }
   }

@@ -1,1 +1,1 @@
-export type Controller = new () => {};
+export type Controller = new () => void;
