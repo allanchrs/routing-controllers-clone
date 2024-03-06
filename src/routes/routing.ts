@@ -1,12 +1,8 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { Server } from "socket.io";
 import { Router } from "./router";
-import { NotFoundException } from "@exceptions/not-fount.exception";
-import { BadRequestException } from "@exceptions/bad-request.exception";
 import { HttpMethodEnum, HttpStatusCodeEnum } from "@common/enums";
 import { setJsonBody } from "@common/utils";
-import { MapRouter } from "@local-types/map-router.type";
-import { logger } from "@utils/logger/logger";
 import { ErrorHandler } from "@middlewares/errors";
 import { MiddlewareConfig } from "@middlewares/middleware.config";
 import { RequestValidations } from "@utils/validations";
