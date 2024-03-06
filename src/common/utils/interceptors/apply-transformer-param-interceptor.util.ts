@@ -1,9 +1,9 @@
-import { transformers } from "./transformers";
-import { IncomingMessage, ServerResponse } from "http";
+import { ServerResponse } from "http";
 import { Server } from "socket.io";
-import { http_args_mapper_params } from "./args-maps/args-map.util";
 import { RouteDecoratorOptions } from "@local-types/route-decorator-options.type";
 import { IRequest } from "@interfaces/request.interface";
+import { requestParamsMapper } from "../mappers";
+import { transformersParamsInterceptor } from "./transformers-params-interceptor.util";
 
 type Args = [IRequest, ServerResponse, Server | undefined]
 
@@ -19,7 +19,7 @@ type ApplyTransformersArgs = {
  * @param path The path associated with the method.
  * @returns An array of modified or validated method parameters.
  */
-export const applyTransformers = async ({ indices, target, args, path }: ApplyTransformersArgs): Promise<any[]> => {
+export const applyTransformerParamInterceptor = async ({ indices, target, args, path }: ApplyTransformersArgs): Promise<any[]> => {
   const output: any[] = [];
   const { prefix } = target;
 
@@ -27,11 +27,11 @@ export const applyTransformers = async ({ indices, target, args, path }: ApplyTr
   await Promise.all(
     indices.map(async ({ index, key, param }) => {
       // Get the parameter mapper for the HTTP arguments
-      const param_mapper = http_args_mapper_params(args);
+      const param_mapper = requestParamsMapper(args);
       // Get the argument value based on the parameter key
       const arg = param_mapper[key];
       // Get the transformer function for the parameter
-      const transform = transformers[key];
+      const transform = transformersParamsInterceptor[key];
       // Apply the transformer to the argument value
       const parsed_param = await transform({ arg, prefix, path, param });
       // Store the transformed parameter in the output array

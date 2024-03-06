@@ -1,11 +1,12 @@
 import { NoRoutesRegisteredException } from "@exceptions/no-routes-registered.exception";
+import { NotFoundException } from "@exceptions/not-fount.exception";
 import { ControllerRoutes } from "@local-types/controller-routes.type";
 import { Controller } from "@local-types/controller.type";
 import { MapRouter } from "@local-types/map-router.type";
 import { RegisterRoute } from "@local-types/register-route.type";
-import { getPrototypeValue } from "@utils/get-prototype-value.util";
 import { logger } from "@utils/logger/logger";
-import { getRouteMatchKey } from "@utils/url-match.util";
+import { getPrototypeValue } from "@utils/objects";
+import { getRouteMatchKey } from "@utils/requests";
 
 /**
  * Router class responsible for managing routes.
@@ -102,15 +103,28 @@ export class Router {
     })
   }
 
+  private requestLogger(route: MapRouter): void {
+    logger.info(`[${route.method}] /${this.getRouteUrl(route.prefix, route.path)}`)
+  }
+
+
   /**
    * Retrieves the route handler for the given method and URL.
    * @param method The HTTP method.
    * @param url The URL of the request.
    * @returns The route handler.
    */
-  protected getRoute(method: string, url?: string): MapRouter | undefined {
+  protected getRoute(method: string, url?: string): MapRouter {
     const route_key = this.getRouteKey(method, url);
 
-    return this.routes.get(route_key ?? '');
+    const route = this.routes.get(route_key ?? '');
+
+    if (!route) {
+      throw new NotFoundException(`Route [${method}]: ${url} not found.`);
+    }
+
+    this.requestLogger(route);
+
+    return route;
   }
 }

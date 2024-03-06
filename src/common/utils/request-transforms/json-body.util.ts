@@ -6,7 +6,7 @@ import { IncomingMessage } from "http";
  * @param {TransformArgs} args - Arguments for the bodyToJson function.
  * @returns {Promise<any>} A promise that resolves to the parsed JSON body.
  */
-export const bodyToJson = ({ arg: request }: TransformArgs): Promise<any> => {
+export const setJsonBody = ({ arg: request }: TransformArgs): Promise<any> => {
 
   return new Promise((resolve, reject) => {
     if (!request) return resolve(null);

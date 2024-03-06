@@ -1,4 +1,4 @@
-import { applyTransformers, getFunctionParameterIndices } from "@common/utils";
+import { applyTransformerParamInterceptor, getFunctionParameterIndices } from "@common/utils";
 import { IRequest } from "@interfaces/request.interface";
 import { RouteDecoratorOptions } from "@local-types/route-decorator-options.type";
 import { ServerResponse } from "http";
@@ -26,7 +26,7 @@ export const routeParamsInterceptor = (input: RouteDecoratorOptions) => {
       const indices = getFunctionParameterIndices(target, key);
 
       // Apply transformers to modify or validate the parameters
-      const params = await applyTransformers({ ...input, indices, target, args });
+      const params = await applyTransformerParamInterceptor({ ...input, indices, target, args });
 
       // Call the original method with the modified parameters
       return method.apply(this, [...params]);

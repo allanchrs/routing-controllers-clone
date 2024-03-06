@@ -3,7 +3,8 @@ import pretty from "pino-pretty";
 
 const stream = pretty({
   colorize: true,
-  ignore: 'pid,hotname'
+  ignore: 'pid,hotname,address,port',
+  colorizeObjects: true
 })
 
 export const logger = pino(stream) 

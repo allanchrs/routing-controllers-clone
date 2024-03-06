@@ -13,6 +13,7 @@ module.exports = {
     '^@enums/(.*)$': '<rootDir>/src/enums/$1',
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@interfaces/(.*)$': '<rootDir>/src/interfaces/$1',
+    '^@middlewares/(.*)$': '<rootDir>/src/middlewares/$1',
     '^@exceptions/(.*)$': '<rootDir>/src/exceptions/$1',
     '^@local-types/(.*)$': '<rootDir>/src/types/$1',
   },

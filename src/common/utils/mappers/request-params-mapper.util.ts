@@ -8,7 +8,7 @@ import { Server } from "socket.io";
  * @param {Array<IRequest, ServerResponse, Server | undefined>} args - The array containing the request, response, and server instances.
  * @returns {Object} An object mapping decorator enums to their corresponding HTTP request parameters.
  */
-export const http_args_mapper_params = ([request, response, io]: [IRequest, ServerResponse, Server | undefined]): object => {
+export const requestParamsMapper = ([request, response, io]: [IRequest, ServerResponse, Server | undefined]): object => {
   return {
     [ParamDecoratorEnum.BODY]: request,
     [ParamDecoratorEnum.PARAM]: request,
