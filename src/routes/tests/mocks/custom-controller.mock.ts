@@ -10,10 +10,10 @@ export class MockCustomController {
     return { success: true, path: '/' }
   }
 
-  @Get('param/:id')
+  @Get('param/:id', { middlewares: [] })
   getWithParam(
     @Param('id') id: string,
-    @Req() req: IRequest
+    @Req() req: IRequest,
   ) {
     return { success: true, path: `param/${id}`, authorization: req.headers.authorization }
   }
